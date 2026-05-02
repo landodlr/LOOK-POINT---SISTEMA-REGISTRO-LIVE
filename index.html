@@ -563,6 +563,9 @@
 </div>
 
 <script>
+// Callback global para JSONP
+window._lpCallback = function() {};
+
 // ──────────────────────────────────────────────
 // DATOS AGENCIAS
 // ──────────────────────────────────────────────
@@ -1292,7 +1295,7 @@ function enviarWhatsApp() {
     referencia    = document.getElementById('delivery-ref').value.trim();
   }
 
-  // Primero guardar en Sheets, luego abrir WhatsApp
+  // Guardar en Sheets via script tag (bypasa CORB y CORS completamente)
   const params = new URLSearchParams({
     whatsapp:      wa,
     dni:           dni,
@@ -1308,20 +1311,23 @@ function enviarWhatsApp() {
     nota:          nota
   });
 
-  // Mostrar pantalla de éxito inmediatamente
+  // Mostrar pantalla de éxito
   document.getElementById('form-main').style.display = 'none';
   document.getElementById('success-card').classList.add('show');
 
-  // Guardar en Sheets
-  fetch(SCRIPT_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' })
-    .catch(() => {})
-    .finally(() => {
-      // Abrir WhatsApp después de que el fetch termine (o falle)
-      setTimeout(() => {
-        const url = `https://api.whatsapp.com/send?phone=${NUMERO_WA}&text=${encodeURIComponent(msg)}`;
-        window.open(url, '_blank');
-      }, 800);
-    });
+  // Método: script tag dinámico (no tiene restricciones CORS ni CORB)
+  const scriptTag = document.createElement('script');
+  scriptTag.src = SCRIPT_URL + '?' + params.toString() + '&callback=_lpCallback';
+  document.head.appendChild(scriptTag);
+  scriptTag.onload = scriptTag.onerror = () => {
+    document.head.removeChild(scriptTag);
+  };
+
+  // Abrir WhatsApp después de 1 segundo
+  setTimeout(() => {
+    const url = `https://api.whatsapp.com/send?phone=${NUMERO_WA}&text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  }, 1000);
 }
 </script>
 </body>
