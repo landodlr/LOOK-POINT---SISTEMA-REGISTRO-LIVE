@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Look Point – Programa tu envío</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f4f0;
+    --accent: #c8ff00;
+    --gray: #1e1e1e;
+    --gray2: #2d2d2d;
+    --muted: #777;
+    --text: #e8e6e0;
+    --border: #333;
+    --radius: 12px;
+    --shalom: #1a6fd4;
+    --olva: #e05c00;
+    --delivery: #00b87a;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--black);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG GRID */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200,255,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,255,0,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 48px 0 36px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+    position: relative;
+  }
+
+  .brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 12vw, 80px);
+    letter-spacing: 4px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .brand span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .tag {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--black);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-top: 12px;
+  }
+
+  /* STEP INDICATOR */
+  .steps {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    align-items: center;
+  }
+
+  .step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.3s;
+  }
+  .step-dot.active { background: var(--accent); transform: scale(1.4); }
+  .step-dot.done { background: var(--accent); opacity: 0.4; }
+
+  .step-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+
+  /* CARDS / SECTIONS */
+  .card {
+    background: var(--gray);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  /* DELIVERY TYPE SELECTOR */
+  .delivery-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  .delivery-btn {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .delivery-btn:hover { border-color: var(--accent); background: rgba(200,255,0,0.04); }
+  .delivery-btn.selected { border-color: var(--accent); background: rgba(200,255,0,0.08); }
+  .delivery-btn .icon { font-size: 22px; margin-bottom: 6px; display: block; }
+  .delivery-btn .label { font-size: 11px; font-weight: 500; display: block; line-height: 1.3; }
+  .delivery-btn .sub { font-size: 9px; color: var(--muted); display: block; margin-top: 2px; }
+
+  .delivery-btn.shalom.selected { border-color: var(--shalom); background: rgba(26,111,212,0.1); }
+  .delivery-btn.olva.selected   { border-color: var(--olva);   background: rgba(224,92,0,0.1); }
+  .delivery-btn.delivery.selected { border-color: var(--delivery); background: rgba(0,184,122,0.1); }
+
+  /* FORM FIELDS */
+  .field {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+
+  label .req { color: var(--accent); }
+
+  input, select, textarea {
+    width: 100%;
+    background: var(--gray2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+
+  input::placeholder, textarea::placeholder { color: var(--muted); font-size: 14px; }
+
+  select option { background: #1e1e1e; color: #e8e6e0; }
+
+  .phone-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .phone-prefix {
+    width: 90px;
+    flex-shrink: 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* AGENCY BADGE */
+  .agency-badge {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    border: 1px solid;
+  }
+  .agency-badge.shalom { background: rgba(26,111,212,0.12); border-color: var(--shalom); color: #6aaff7; }
+  .agency-badge.olva   { background: rgba(224,92,0,0.12);   border-color: var(--olva);   color: #f5a96b; }
+  .agency-badge.show { display: flex; }
+
+  /* INFO BOX */
+  .info-box {
+    background: rgba(200,255,0,0.06);
+    border: 1px solid rgba(200,255,0,0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #b8c88a;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  /* SECTION HIDDEN */
+  .section { display: none; }
+  .section.visible { display: block; animation: fadeUp 0.3s ease both; }
+
+  /* SUBMIT BTN */
+  .btn-whatsapp {
+    width: 100%;
+    padding: 18px;
+    background: var(--accent);
+    color: var(--black);
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+
+  .btn-whatsapp:hover {
+    background: #d9ff33;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(200,255,0,0.25);
+  }
+
+  .btn-whatsapp:active { transform: translateY(0); }
+
+  .btn-whatsapp svg { width: 22px; height: 22px; }
+
+  /* ERROR */
+  .error-msg {
+    display: none;
+    color: #ff6b6b;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+  .error-msg.show { display: block; }
+  input.err, select.err { border-color: #ff6b6b; }
+
+  /* SUCCESS */
+  .success-card {
+    display: none;
+    text-align: center;
+    padding: 48px 24px;
+  }
+  .success-card.show { display: block; animation: fadeUp 0.5s ease both; }
+  .success-icon { font-size: 56px; margin-bottom: 16px; }
+  .success-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .success-text { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 24px 0;
+    font-size: 11px;
+    color: var(--border);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+
+  @media (max-width: 400px) {
+    .delivery-grid { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="brand">LOOK<span>POINT</span></div>
+    <div class="subtitle">Programa tu envío</div>
+
+  </header>
+
+  <!-- PASO 1: TIPO DE ENTREGA -->
+  <div class="steps" id="step-indicator">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+    <span class="step-label" id="step-text">Paso 1 de 3</span>
+  </div>
+
+  <div id="form-main">
+
+    <!-- PASO 1 -->
+    <div class="card" id="step1-card">
+      <div class="card-label">¿Cómo quieres recibir tu pedido?</div>
+      <div class="delivery-grid">
+        <button class="delivery-btn shalom" onclick="selectDelivery('shalom')">
+          <span class="icon">🚚</span>
+          <span class="label">Agencia Shalom</span>
+          <span class="sub">A nivel nacional</span>
+        </button>
+        <button class="delivery-btn olva" onclick="selectDelivery('olva')">
+          <span class="icon">📮</span>
+          <span class="label">Agencia Olva</span>
+          <span class="sub">A nivel nacional</span>
+        </button>
+        <button class="delivery-btn delivery" onclick="selectDelivery('delivery')">
+          <span class="icon">🛵</span>
+          <span class="label">Delivery</span>
+          <span class="sub">Solo Lima</span>
+        </button>
+      </div>
+      <div class="error-msg" id="err-tipo">Por favor selecciona una opción de entrega</div>
+    </div>
+
+    <!-- PASO 2: DATOS DE ENVÍO (agencia o delivery) -->
+    <div class="section" id="step2-section">
+
+      <!-- AGENCIA SHALOM -->
+      <div class="section" id="sec-shalom">
+        <div class="card">
+          <div class="card-label">Datos de agencia Shalom</div>
+          <div class="agency-badge shalom show">
+            🔵 Shalom Empresarial — Tel: (01) 500-7878
+          </div>
+          <div class="field">
+            <label>Departamento <span class="req">*</span></label>
+            <select id="shalom-dep" onchange="loadShalom()">
+              <option value="">Selecciona tu departamento...</option>
+              <option>Lima</option><option>Callao</option><option>Arequipa</option>
+              <option>La Libertad</option><option>Piura</option><option>Cusco</option>
+              <option>San Martín</option><option>Junín</option><option>Lambayeque</option>
+              <option>Cajamarca</option><option>Ica</option><option>Puno</option>
+              <option>Áncash</option><option>Tacna</option><option>Tumbes</option>
+              <option>Loreto</option><option>Ucayali</option><option>Moquegua</option>
+              <option>Amazonas</option><option>Huánuco</option><option>Madre de Dios</option>
+              <option>Ayacucho</option><option>Pasco</option><option>Apurímac</option>
+              <option>Huancavelica</option>
+            </select>
+            <div class="error-msg" id="err-sdep">Selecciona el departamento</div>
+          </div>
+          <div class="field">
+            <label>Ciudad / Distrito <span class="req">*</span></label>
+            <select id="shalom-ciudad">
+              <option value="">Primero selecciona el departamento...</option>
+            </select>
+            <div class="error-msg" id="err-sciudad">Selecciona la ciudad</div>
+          </div>
+          <div class="field">
+            <label>Agencia <span class="req">*</span></label>
+            <select id="shalom-agencia" onchange="fillSholomDir()">
+              <option value="">Primero selecciona la ciudad...</option>
+            </select>
+            <div class="error-msg" id="err-sagencia">Selecciona la agencia</div>
+          </div>
+          <div class="field">
+            <label>Dirección de la agencia</label>
+            <input type="text" id="shalom-dir" placeholder="Se llenará automáticamente" readonly style="opacity:0.6">
+          </div>
+        </div>
+      </div>
+
+      <!-- AGENCIA OLVA -->
+      <div class="section" id="sec-olva">
+        <div class="card">
+          <div class="card-label">Datos de agencia Olva</div>
+          <div class="agency-badge olva show">
+            🟠 Olva Courier — Tel: (01) 714-0909
+          </div>
+          <div class="field">
+            <label>Departamento <span class="req">*</span></label>
+            <select id="olva-dep" onchange="loadOlva()">
+              <option value="">Selecciona tu departamento...</option>
+              <option>Lima</option><option>Arequipa</option><option>La Libertad</option>
+              <option>Piura</option><option>Lambayeque</option><option>Junín</option>
+              <option>San Martín</option><option>Otros departamentos</option>
+            </select>
+            <div class="error-msg" id="err-odep">Selecciona el departamento</div>
+          </div>
+          <div class="field">
+            <label>Agencia / Tienda <span class="req">*</span></label>
+            <select id="olva-agencia" onchange="fillOlvaDir()">
+              <option value="">Primero selecciona el departamento...</option>
+            </select>
+            <div class="error-msg" id="err-oagencia">Selecciona la agencia</div>
+          </div>
+          <div class="field">
+            <label>Dirección de la agencia</label>
+            <input type="text" id="olva-dir" placeholder="Se llenará automáticamente" readonly style="opacity:0.6">
+          </div>
+        </div>
+      </div>
+
+      <!-- DELIVERY -->
+      <div class="section" id="sec-delivery">
+        <div class="card">
+          <div class="card-label">Dirección de entrega (Lima)</div>
+          <div class="info-box">
+            🛵 El delivery aplica solo dentro de Lima Metropolitana. El costo se coordina por WhatsApp según tu distrito.
+          </div>
+          <div class="field">
+            <label>Distrito <span class="req">*</span></label>
+            <select id="delivery-distrito">
+              <option value="">Selecciona tu distrito...</option>
+              <option>Ancón</option><option>Ate</option><option>Barranco</option>
+              <option>Breña</option><option>Carabayllo</option><option>Chaclacayo</option>
+              <option>Chorrillos</option><option>Cieneguilla</option><option>Comas</option>
+              <option>El Agustino</option><option>Independencia</option><option>Jesús María</option>
+              <option>La Molina</option><option>La Victoria</option><option>Lima (Cercado)</option>
+              <option>Lince</option><option>Los Olivos</option><option>Lurigancho</option>
+              <option>Lurín</option><option>Magdalena del Mar</option><option>Miraflores</option>
+              <option>Pachacamac</option><option>Pucusana</option><option>Pueblo Libre</option>
+              <option>Puente Piedra</option><option>Punta Hermosa</option><option>Punta Negra</option>
+              <option>Rímac</option><option>San Bartolo</option><option>San Borja</option>
+              <option>San Isidro</option><option>San Juan de Lurigancho</option>
+              <option>San Juan de Miraflores</option><option>San Luis</option>
+              <option>San Martín de Porres</option><option>San Miguel</option>
+              <option>Santa Anita</option><option>Santa María del Mar</option>
+              <option>Santa Rosa</option><option>Santiago de Surco</option>
+              <option>Surquillo</option><option>Villa El Salvador</option>
+              <option>Villa María del Triunfo</option>
+            </select>
+            <div class="error-msg" id="err-ddistr">Selecciona el distrito</div>
+          </div>
+          <div class="field">
+            <label>Dirección exacta <span class="req">*</span></label>
+            <input type="text" id="delivery-dir" placeholder="Ej: Av. Brasil 1234, Dpto 302">
+            <div class="error-msg" id="err-ddir">Ingresa la dirección</div>
+          </div>
+          <div class="field">
+            <label>Referencia</label>
+            <input type="text" id="delivery-ref" placeholder="Ej: Frente al parque, edificio azul">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PASO 3: DATOS PERSONALES -->
+    <div class="section" id="step3-section">
+      <div class="card">
+        <div class="card-label">Tus datos personales</div>
+
+        <div class="field">
+          <label>Nombre completo <span class="req">*</span></label>
+          <input type="text" id="nombre" placeholder="Como figura en tu DNI">
+          <div class="error-msg" id="err-nombre">Ingresa tu nombre completo</div>
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label>DNI / CE <span class="req">*</span></label>
+            <input type="text" id="dni" placeholder="12345678" maxlength="12" inputmode="numeric">
+            <div class="error-msg" id="err-dni">Ingresa tu DNI</div>
+          </div>
+          <div class="field">
+            <label>WhatsApp <span class="req">*</span></label>
+            <input type="tel" id="whatsapp" placeholder="9XX XXX XXX" maxlength="12" inputmode="numeric">
+            <div class="error-msg" id="err-wa">Ingresa tu WhatsApp</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>¿Cuándo lo enviamos? <span class="req">*</span></label>
+          <input type="date" id="fecha" min="">
+          <div class="error-msg" id="err-fecha">Selecciona la fecha de envío</div>
+        </div>
+
+        <div class="field">
+          <label>Nota adicional (opcional)</label>
+          <textarea id="nota" rows="2" placeholder="Indicaciones especiales, número de pedido, etc."></textarea>
+        </div>
+
+        <button class="btn-whatsapp" onclick="enviarWhatsApp()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          ENVIAR POR WHATSAPP
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="card success-card" id="success-card">
+    <div class="success-icon">✅</div>
+    <div class="success-title">¡Pedido programado!</div>
+    <div class="success-text">
+      Tu información fue enviada por WhatsApp.<br>
+      Continúa la conversación para confirmar tu pedido.<br><br>
+      <strong style="color:var(--accent)">Look Point</strong> te atenderá en breve 🙌
+    </div>
+  </div>
+
+  <footer>© 2025 Look Point — Todos los derechos reservados</footer>
+
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// DATOS AGENCIAS
+// ──────────────────────────────────────────────
+const SHALOM = {
+  "Lima": {
+    "San Juan de Lurigancho": [
+      {name:"Av Circunvalacion Sjl", dir:"Av. circunvalación mz. b-5 lt. 20 aa.hh. sargento fernando lores tenazoa"},
+      {name:"Av Malecon Checa Cdra. 1", dir:"Av. malecón miguel checa eguiguren n° 167 y 169 urb. zárate"},
+      {name:"Av Santa Rosa Urb los Alamos", dir:"Av. santa rosa mz. d1 lote 1 urb. los alamos 2da etapa"},
+      {name:"Av. 13 de Enero", dir:"Av. 13 de enero nº2057, urb. san hilarión"},
+      {name:"Av. Central", dir:"Av. central mz r9 lote 3 programa ciudad mrcal. caceres, sector ii"},
+      {name:"Av. Santa Rosa Cruce Av. el Sol", dir:"Av. santa rosa de lima mz. d lt. 4 – aahh 2 de setiembre"},
+      {name:"Av. del Mercado", dir:"Programa ciudad mrcal. caceres, sector iii mz. q8 lt. 11"},
+      {name:"Bayovar", dir:"Av. fernando wiesse mz. e8 lote 38b, mariscal cáceres bayovar"},
+      {name:"Campoy", dir:"Av. malecón checa mz. b lt. 7, urb. campoy"},
+      {name:"Canto Grande", dir:"Calle san martin con av. comercial norte 189"},
+      {name:"Cruz de Motupe", dir:"Av. fernando wiesse mz. q lote 1 aa.hh. cruz de motupe"},
+      {name:"Jr Chinchaysuyo Cdra 4", dir:"Jr. chinchaysuyo 468 zarate"},
+      {name:"Los Pinos", dir:"Mz. b1 lt. 25 urbanización los pinos"},
+      {name:"SJL Las Flores", dir:"Av. canto grande n°. 2570 – urb. ganimedes"},
+      {name:"SJL Av. Proceres", dir:"Av. próceres de la independencia nro. 1295 – 1299"},
+    ],
+    "San Martín de Porres": [
+      {name:"Av Bertello", dir:"Av. alejandro bertello bollati mz. h lt. 2-a – asoc. san remo ii etapa"},
+      {name:"Av Jose Granda Cdra 38", dir:"Av. josé granda 3826 urb. condevilla señor y valdivieso"},
+      {name:"Av Jose Granda Cdra. 25", dir:"Av. jose granda 2546"},
+      {name:"Av. Canta Callao Con Alisos", dir:"Av. canta callao, mz. a lt. 3 urb. arizona 2da etapa"},
+      {name:"Av. Canta Callao Con Izaguirre", dir:"Av. canta callao mz. a lt. 3 asoc. brisas santa rosa"},
+      {name:"Av. Carlos Izaguirre Cdra 23", dir:"Av. carlos izaguirre sub lt. 8, mz. c – asoc. los nisperos"},
+      {name:"Av. Dominicos Cdra 14", dir:"Av. los dominicos 1460 – urb. los cipreses mz. z lt. 4"},
+      {name:"Av. Gerardo Unger Cdra 64", dir:"Av. gerardo unger 6475, urb. santa luisa, 1ra etapa"},
+      {name:"Av. Lima Cdra 38", dir:"Av. lima 3899"},
+      {name:"Av. Peru 15", dir:"Av. perú 1589"},
+      {name:"Av. Universitaria Cdra. 16", dir:"Av. universitaria 1619 – urb. maria gracia de antares"},
+      {name:"Fiori", dir:"Av. miguel angel n° 235 – urb. fiori 4ta etapa"},
+      {name:"Germán Aguirre", dir:"Av. german aguirre ugarte 649 urb. san german"},
+      {name:"SMP Av. Proceres", dir:"Av. próceres n° 588 urb. covicem"},
+    ],
+    "Ate Vitarte": [
+      {name:"Av Esperanza", dir:"Av. esperanza mz. k lt. 06 las americas"},
+      {name:"Av Marco Puente", dir:"Av. marco puente llanos 309, mz. a, lt. 03"},
+      {name:"Av el Sol", dir:"Av. el sol mz. s lt. 2 zona 03 – asoc. parque industrial el asesor"},
+      {name:"Huaycan Av Horacio Zevallos", dir:"Av. horacio zeballos mz. v lt. 12 residencial pariachi zona 5"},
+      {name:"Huaycan Av Jose C Mariategui", dir:"Av. josé carlos mariátegui z. e lt. 23 ucv 5 – pueblo joven huaycán"},
+      {name:"Huaycan Entrada", dir:"Carretera central km 17 mz. e lt. 1"},
+      {name:"Huaycan el Descanso", dir:"Av. jose carlos mariategui mza. b lte 06, residencial pariachi"},
+      {name:"Los Sauces", dir:"Av. santa rosa n°773 manzana a lote 6 urb los sauces"},
+      {name:"Puente Santa Anita", dir:"Av. nicolás ayllón n° 3080"},
+      {name:"Santa Clara", dir:"Av. pedro ruíz gallo mz. h lt. 3 asoc. villa san luis, santa clara"},
+      {name:"Urb Santa Elvira", dir:"Av. ferrocarril mz. c lt. 19 parcela 3, urb. santa elvira"},
+    ],
+    "Los Olivos": [
+      {name:"Av Huandoy Con Av Central", dir:"Av. huandoy mza. 72 lte. 54 p.j. confraternidad"},
+      {name:"Av Huandoy Con Marañon", dir:"Av. próceres, mz. 3, lt. 23 a.h. laura caller"},
+      {name:"Av. Angelica Gamarra", dir:"Av. angelica gamarra de leon valverde n° 621 urb el trebol"},
+      {name:"Av. Carlos Izaguirre Cdra. 14", dir:"Calle david alva manzana h lote 4 urb. cajabamba"},
+      {name:"Av. Dos de Octubre", dir:"Av. 2 de octubre mz. h lt. 2 – Los Olivos PRO"},
+      {name:"Av. las Palmeras", dir:"Av. las palmeras n° 5236 urb. villa norte"},
+      {name:"Av. los Platinos", dir:"Av. los platinos n°. 259, mz. a lt. 17, urb. lotización industrial infantas"},
+      {name:"Pro", dir:"Av. los próceres mz. pp2 lt.21, urb. puertas de pro"},
+    ],
+    "Carabayllo": [
+      {name:"Av Jose Saco Rojas", dir:"Av. josé saco rojas mz. a lt. 15 programa el pino, san antonio"},
+      {name:"Av Tupac Amaru Km. 19", dir:"Av. tupac amaru n° 10472"},
+      {name:"Av. Tupac Amaru Km. 23.5", dir:"Av. túpac amaru km. 23.5"},
+      {name:"Carabayllo Establo", dir:"Av. tupac amaru n° 441 – 443, mz. o2 lt. 35"},
+      {name:"El Progreso Km 22", dir:"Av. tupac amaru 3493 – p.j. el progreso mz. k lt. 11b zona ii"},
+      {name:"Santo Domingo", dir:"Av. a mz. l2 lt. 20 urb. santo domingo vi etapa"},
+      {name:"Tungasuca", dir:"Av. trapiche mz. p lt. 48, urb. tungasuca"},
+    ],
+    "Comas": [
+      {name:"Av Tupac Amaru Cdra. 57", dir:"Av. tupac amaru 5725-5727 – urb. huaquillay i etapa"},
+      {name:"Av Univ. Retablo", dir:"Av. universitaria n° 7241"},
+      {name:"Av. Trapiche", dir:"Av. trapiche 886 a 16 2p 2 – urb. pinar"},
+      {name:"Av. Univ. Parque Sinchi Roca", dir:"Av. universitaria norte mzn. q1 lte. 030 urb. primavera"},
+      {name:"Año Nuevo", dir:"Av. tupac amaru n° 7837-7839 mz. c lt. 010 urb. san juan bautista"},
+    ],
+    "La Molina": [
+      {name:"Av Flora Tristan", dir:"Av. flora tristán n° 885, urb. santa patricia iii etapa"},
+      {name:"Av la Fontana", dir:"Av la fontana 440 (cc la rotonda ii local 1018)"},
+      {name:"Los Fresnos", dir:"Av. los fresnos 1305 tienda 2 – urb. portada del sol i etapa"},
+      {name:"Parque la Molina", dir:"Av. la molina 2448"},
+    ],
+    "Puente Piedra": [
+      {name:"Av Buenos Aires", dir:"Av. buenos aires mz. d, sub-lote 188e1 asoc. micaela bastidas"},
+      {name:"Av. San Lorenzo", dir:"Av. san lorenzo mz c lt 20 – adp virgen de copacabana"},
+      {name:"Ovalo Puente Piedra", dir:"Av. miguel grau mz. a lt. 07 y 08 urb. san martin de porres"},
+      {name:"Puente Arica", dir:"Panamericana norte km 32.5, a 1/2 cuadra del puente arica"},
+      {name:"Zapallal", dir:"Av. ancón 678, Zapallal"},
+    ],
+    "San Juan de Miraflores": [
+      {name:"Atocongo", dir:"Av. de los héroes n° 228 (estación atocongo)"},
+      {name:"Av Miguel Grau Pamplona Alta", dir:"Av. almirante miguel grau mz. y3 lt. 29, pamplona alta"},
+      {name:"Av San Juan Pamplona Alta", dir:"Av. san juan mz. 24 lt. 1, sect. nuevo horizonte, pamplona alta"},
+      {name:"Av. Canevaro", dir:"Av. canevaro 336 – a"},
+      {name:"Maria Auxiliadora", dir:"Av. los héroes 1140"},
+    ],
+    "Villa María del Triunfo": [
+      {name:"Av. Lima", dir:"Av. lima 2208 josé gálvez"},
+      {name:"Av. Villa Maria", dir:"Av villa maria mz. g12 lt. 9 – b ps 1 sect."},
+      {name:"Las Conchitas", dir:"Av. pachacutec 6779, mz. n, lt. 20"},
+      {name:"Nueva Esperanza", dir:"Av. 26 de noviembre, 1728b mz. 90 sub lote. 19b pueblo joven nueva esperanza"},
+      {name:"Pesquero", dir:"Av. pachacutec n° 3548"},
+    ],
+    "Villa El Salvador": [
+      {name:"01 de Mayo", dir:"Av. 01 de mayo 1 sect gp 23 – mz n lote 13"},
+      {name:"Av. Cesar Vallejo VES", dir:"Av. cesar vallejo, mz. f lt. 1 – sect. 2"},
+      {name:"Av. Pastor Sevilla", dir:"Mz. b lt. 3 barrio 3 sector 2 – 4ta etapa"},
+      {name:"Óvalo Mariátegui", dir:"Av. pastor sevilla sect. 6 – gp 7 – mz. a – lote 05"},
+    ],
+    "Cercado de Lima": [
+      {name:"Av Nicolas Dueñas Cdra. 5", dir:"Av. nicolas dueñas 584 mz. c lt. 4"},
+      {name:"Lima Av Tingo María", dir:"Av. tingo maría n°1252-a"},
+      {name:"Malvinas Jr. Garcia Villón", dir:"Jr. presbítero garcía villon nro. 560"},
+      {name:"Malvinas Jr. Ricardo Treneman", dir:"Jr. ricardo treneman n° 920"},
+    ],
+    "Chorrillos": [
+      {name:"Chorrillos Co", dir:"Av. santa anita n.° 580"},
+      {name:"Chorrillos los Faisanes", dir:"Av. los faisanes 420"},
+      {name:"Las Delicias de Villa", dir:"Av. 12 de octubre mz. a 03, lt. 02, urb. aria – las delicias de villa"},
+      {name:"Megaplaza Chorrillos", dir:"Av. alameda sur 5"},
+    ],
+    "Independencia": [
+      {name:"Calle a Con Av Industrial", dir:"Calle a, mz. d lt. 26 urb. panamericana"},
+      {name:"La Cincuenta", dir:"Av. tupac amaru n° 4708 – 4710"},
+      {name:"Megaplaza Independencia", dir:"Av. alfredo mendiola 3698"},
+      {name:"Plaza Norte Entregas", dir:"Av. gerardo unger nro. 6917 int. lb 19"},
+    ],
+    "La Victoria": [
+      {name:"Av Mexico Co", dir:"Av. mexico 1125"},
+      {name:"Av. Canada", dir:"Av. canadá 1603"},
+      {name:"Jr. Raymondi", dir:"Jr. antonio raymondi nro. 113"},
+    ],
+    "Lurigancho-Chosica": [
+      {name:"Chosica", dir:"El sol 124 (parque echenique)"},
+      {name:"Huachipa Co", dir:"Huachipa este – manzana a18 lote 1"},
+      {name:"Santa María de Huachipa", dir:"Av. circunvalación mz. a lt. 1 – santa maría de huachipa"},
+    ],
+    "Pachacamac": [
+      {name:"Av Manuel Valle", dir:"Av. manuel valle sub-lote 2-1, proyecto huertos de pachacamac"},
+      {name:"La Curva de Manchay", dir:"Av. prolongación av. la molina mz. e lote 21"},
+      {name:"Manchay Tres Marias", dir:"Av. victor malasquez mz. b11 sub-lote 06-a – huertos de manchay"},
+    ],
+    "Santiago de Surco": [
+      {name:"Av Tomas Marsano – la Bolichera", dir:"Av. santiago de surco nº 4348, urb. la virreyna"},
+      {name:"Higuereta", dir:"Calle barlovento n° 134"},
+      {name:"Surco Mateo Pumacahua", dir:"Av. san juan mz a lote 01 mateo pumacahua"},
+    ],
+    "El Agustino": [
+      {name:"Av Amancaes", dir:"Av. amancaes 644"},
+      {name:"Av. Riva Agüero", dir:"Av. riva agüero 1451"},
+    ],
+    "Santa Anita": [
+      {name:"Av. Los Frutales", dir:"Av. los frutales n° 282"},
+      {name:"Av. 1ro de Mayo", dir:"Av. 1ro de mayo mz. e lt. 31"},
+    ],
+    "Breña": [
+      {name:"Av Venezuela", dir:"Av. venezuela 1670"},
+      {name:"Jr. Huaraz - Breña", dir:"Jr. huaraz n° 1380"},
+    ],
+    "Lince":        [{name:"Av Arenales Lince", dir:"Av. arenales 1580"}],
+    "San Borja":    [{name:"Av. Angamos Este", dir:"Av. angamos este n° 2609"}],
+    "Miraflores":   [{name:"Av. Comandante Espinar", dir:"Av. comandante espinar 667"}],
+    "Surquillo":    [{name:"Av. Tomas Marsano", dir:"Av. tomás marsano n° 1238"}],
+    "San Isidro":   [{name:"Av. República de Panamá", dir:"Av. república de panamá 3603"}],
+    "Jesús María":  [{name:"Av. Brasil", dir:"Av. brasil n° 1756"}],
+    "Pueblo Libre": [{name:"Av. Universitaria Cdra 27", dir:"Av. universitaria 2755"}],
+    "San Miguel":   [{name:"Av. La Marina", dir:"Av. la marina 2100"}],
+    "Barranco":     [{name:"Av. Grau – Barranco", dir:"Av. grau 1096"}],
+    "Lurín":        [{name:"Av. Industrial Lurín", dir:"Av. industrial mz. c lt. 2 urb. los huertos de lurín"}],
+    "Punta Hermosa":[{name:"Av. Punta Hermosa", dir:"Av. los laureles mz. b lt. 5"}],
+    "Cieneguilla":  [{name:"Cieneguilla Km. 14.5", dir:"Av. la molina km. 14.5"}],
+    "Ancón":        [{name:"Av. Lima – Ancón", dir:"Av. lima s/n – Ancón"}],
+    "Rímac":        [{name:"Guardia Republicana Cdra. 9", dir:"Av. guardia republicana cdra. 9"}],
+  },
+  "Callao": {
+    "Callao": [
+      {name:"Av. Canta Callao", dir:"Av. canta callao mz. a lt. 15 – asoc. brisas santa rosa"},
+      {name:"Bellavista Faucett", dir:"Av. faucett s/n – Bellavista"},
+      {name:"Callao Faucett", dir:"Av. faucett s/n – Callao cercado"},
+      {name:"Av. Guardia Chalaca", dir:"Av. guardia chalaca mz. f lt. 1 – p.j. nicolas garatea"},
+      {name:"Av. Óscar R. Benavides", dir:"Av. Óscar R. Benavides 860"},
+    ],
+    "Ventanilla": [{name:"Ventanilla", dir:"Av. s/n – Ventanilla"}],
+    "Mi Perú":    [{name:"Av. Victor R. Haya", dir:"Av. victor raul haya de la torre mz. a lt. 02, confraternidad"}],
+  },
+  "Arequipa": {
+    "Arequipa (cercado)": [{name:"Av. Parra 379", dir:"Av. Parra 379, Cercado, Arequipa"}],
+    "Alto Selva Alegre":  [
+      {name:"Av. Lima", dir:"Av. Lima N° 406"},
+      {name:"Av. Salazar Bondy", dir:"Av. Augusto Salazar Bondy Mz J Lt 4"},
+    ],
+    "Cayma":          [{name:"Plaza La Tomilla", dir:"Av. Ramón Castilla N° 1000-B"},{name:"Av. Charcani", dir:"Av. Charcani 401, Asoc. José Olaya"}],
+    "Cerro Colorado": [
+      {name:"Ciudad Municipal", dir:"Asoc. Centro Industrial Las Canteras, Mz. A Sub Lote 2"},
+      {name:"Asoc. Las Flores", dir:"Av. 54, Zona 2, Mz. J, Lote 8"},
+      {name:"Pumacahua", dir:"Urb. San Felipe Lt 14"},
+      {name:"Zamacola", dir:"Calle Yavarí 507 B, pueblo de Zamacola"},
+      {name:"Av. Los Incas", dir:"Av. Los Incas N° 604, Semi rural Pachacútec"},
+      {name:"Autopista La Joya", dir:"Asoc. Urbanizadora Peruarbo, Mz. B4 Lt. 4"},
+      {name:"Asoc. Nuevo Horizonte", dir:"Mz. H, Lote 12"},
+    ],
+    "Jacobo Hunter":  [{name:"Jacobo Hunter", dir:"Calle Argentina #405-A"}],
+    "La Joya":        [{name:"El Cruce La Joya", dir:"Lateral 12 C Lt. 32, La Joya"}],
+    "Mariano Melgar": [{name:"Mariano Melgar", dir:"Calle Ancash N° 202"}],
+    "Miraflores (Arq)":[{name:"Miraflores", dir:"Av. Goyeneche N° 1422"}],
+    "Paucarpata":     [{name:"Urb. Manuel Prado", dir:"Calle Belén N°100-A, Urb. Manuel Prado"},{name:"Av. Jesús", dir:"Av. Jesús N° 1100"}],
+    "Socabaya":       [{name:"Los Toritos", dir:"Av. Socabaya 302, Urb. San Martín"},{name:"Horacio Zeballos", dir:"Asoc. Urbano Municipal Horacio Zeballos, Mz.1, Lt.18"}],
+    "Uchumayo":       [{name:"Uchumayo", dir:"Urb. El Carmen, Mz. E, Lote 1"}],
+    "Yura":           [{name:"Yura", dir:"Ciudad de Dios, Mz. O, Lote 4, Zona 2"}],
+    "Camaná":         [{name:"Camaná", dir:"Calle Agustín Gamarra N° 451, Cercado, Camaná"}],
+    "Chala":          [{name:"Chala", dir:"Av. Emancipación Mz. 51, Lote 3, Chala"}],
+    "Aplao":          [{name:"Aplao", dir:"Mz. X1 Lt.7 Calle 8 de Setiembre, Aplao"}],
+    "Majes":          [{name:"Majes Pedregal", dir:"Calle Yarabamba Mz.Y Lt.7, Pedregal, Caylloma"}],
+    "Mollendo":       [{name:"Mollendo CO", dir:"Mariscal Castilla 472-A, Mollendo"},{name:"Cercado Mollendo", dir:"Calle Dean Valdivia 388, Mollendo"}],
+    "Cocachacra":     [{name:"Cocachacra", dir:"Mz. N5 Sub-lote 5b, Cocachacra, Islay"}],
+    "Matarani":       [{name:"Matarani", dir:"Asentamiento Humano Puerto Nuevo, Mz. I Lt. 18, Matarani"}],
+  },
+  "La Libertad": {
+    "Trujillo": [
+      {name:"Calle Liverpool", dir:"Calle Liverpool N° 329, Urb. Santa Isabel"},
+      {name:"La Perla", dir:"Av. La Perla Mz. E Lote 05, Urb. Ingeniería"},
+      {name:"Atahualpa", dir:"Calle Atahualpa 481"},
+      {name:"Santa Cruz – América Sur", dir:"Calle Santa Cruz N° 389 Chicago"},
+      {name:"Av. Hnos. Uceda – América Norte", dir:"Av. Hermanos Uceda Meza N° 269, Urb. Miraflores II"},
+      {name:"Óvalo Papal", dir:"Urb. Vista Hermosa Mz. F Lt. 11 Piso 1"},
+      {name:"Av. Mansiche", dir:"Av. mansiche nro. 2042"},
+      {name:"Av. Larco", dir:"Av. Larco 865, Mz. X Lt. 28"},
+      {name:"Real Plaza Trujillo", dir:"Av. cesar vallejo oeste n° 1345"},
+      {name:"Av. Santa", dir:"Av. santa 1260"},
+    ],
+    "El Porvenir": [
+      {name:"Av. Hermanos Angulo", dir:"Av. Hermanos Angulo 628"},
+      {name:"Alto Trujillo", dir:"Av. Prolongación 12 de Noviembre, Mz. Q, Lt. 25"},
+      {name:"Av. Las Magnolias", dir:"Av. Las Magnolias Mz. 25 Lt. 2A, Nuevo Porvenir"},
+      {name:"Jr. Cahuide", dir:"Jr. Cahuide N° 342, AA.HH. La Merced"},
+    ],
+    "Huanchaco": [
+      {name:"Óvalo Huanchaco", dir:"Carretera Vía de Evitamiento 576.2, Huanchaquito Alto"},
+      {name:"El Milagro", dir:"Av. Industrial Mz. 23 Lt. 13, Sector II, El Milagro"},
+    ],
+    "La Esperanza": [
+      {name:"Av. Tahuantinsuyo", dir:"Av. Tahuantinsuyo N° 739"},
+      {name:"Wichanzao", dir:"Mz. 1 Lt. 23, AA.HH. Wichanzao"},
+    ],
+    "Moche":              [{name:"Moche", dir:"Av. La Marina Lote 25-B, Moche"}],
+    "Víctor Larco":       [{name:"Av. Larco", dir:"Av. Larco 865, Mz. X Lt. 28"}],
+    "Virú":               [{name:"Virú", dir:"Av. s/n – Virú"}],
+    "Chepén":             [{name:"Chepén", dir:"Av. s/n – Chepén"}],
+    "Pacasmayo":          [{name:"Pacasmayo", dir:"Av. s/n – Pacasmayo"}],
+    "Huamachuco":         [{name:"Huamachuco", dir:"Av. s/n – Huamachuco"}],
+    "Otuzco":             [{name:"Otuzco", dir:"Av. s/n – Otuzco"}],
+  },
+  "Cusco": {
+    "Cusco ciudad": [
+      {name:"Vía Expresa – Parque Industrial", dir:"Av. Vía Expresa Mz. E Lote 8 Parque Industrial"},
+      {name:"Arco Ticatica Pustipata", dir:"Arco Ticatica Pustipata, Lt. A-11-2"},
+      {name:"Calle Ciro Alegría", dir:"Calle Ciro Alegría 226-224"},
+      {name:"Asoc. Villa San Francisco", dir:"Asoc. villa san francisco mz. 94 lt. 22"},
+      {name:"Asoc. Vilcanota", dir:"Asoc. pro vivienda vilcanota"},
+      {name:"Av. el Sol", dir:"Av. el sol s/n"},
+    ],
+    "San Sebastián": [
+      {name:"Urb. Cachimayo", dir:"Urb. Cachimayo A-37 Av. la Cultura"},
+      {name:"Tupac Amaru B-1-2", dir:"Urb. Tupac Amaru B-1-2"},
+      {name:"Av. Evitamiento – Chacahuayco", dir:"Av. evitamiento s/n ups Chacahuayco"},
+    ],
+    "Santiago (Cusco)": [
+      {name:"Prol. Av. Antonio Lorena #140", dir:"Prolongación av. antonio lorena #140"},
+      {name:"Av. Industrial Bancopata", dir:"Av. industrial urb. bancopata j-20"},
+    ],
+    "San Jerónimo":  [{name:"Av. La Cultura", dir:"Av. la cultura lote g-7"}],
+    "Wanchaq":       [{name:"Prol. Av. Arequipa", dir:"Prol. av. arequipa 1010 s/n, óvalo san andrés"}],
+    "Sicuani":       [{name:"Jr. Inambari", dir:"Jr. inambari nro. 208, Sicuani – Canchis"}],
+    "Combapata":     [{name:"Combapata", dir:"Av. señor de huanca s/n – Combapata, Canchis"}],
+    "Santo Tomás":   [{name:"Santo Tomás", dir:"Calle bolognesi mz. 02 lt. 25, Santo Tomás – Chumbivilcas"}],
+    "Espinar":       [{name:"Espinar", dir:"Av. tintaya n° 215, Espinar"}],
+    "Quillabamba":   [{name:"Quillabamba", dir:"Jr. puno lt. 10 y 11 mz. g urb. santa ana, La Convención"}],
+    "Urcos":         [{name:"Urcos", dir:"Mayupata s/n paucarbamba, Urcos – Quispicanchi"}],
+    "Anta":          [{name:"Anta Izcuchaca", dir:"Av. s/n – Anta Izcuchaca"}],
+    "Chinchero":     [{name:"Chinchero", dir:"Av. s/n – Chinchero"}],
+  },
+  "Piura": {
+    "Piura": [
+      {name:"Av. Andres Avelino Caceres", dir:"Av. andrés avelino cáceres s/n"},
+      {name:"Av. Grau Piura", dir:"Av. grau manzana n, lote 33, urb. la alborada"},
+      {name:"Av. Gullman", dir:"Av. gullman s/n"},
+      {name:"Av. Luis Eguiguren", dir:"Av. málaga mz. a lt.20 int. 105"},
+      {name:"Av. Municipal", dir:"Av. municipal s/n"},
+      {name:"Calle Emaus", dir:"Calle emaus s/n"},
+      {name:"Av. Balta Cdra. 36", dir:"Av. balta cdra. 36 s/n"},
+    ],
+    "Castilla":      [{name:"Castilla", dir:"Av. tacna 509 castilla"},{name:"Carretera Panamericana A-2", dir:"Carr. panamericana a-2 ah. almirante miguel grau i etapa"}],
+    "Catacaos":      [{name:"Catacaos", dir:"Av. francisco bolognesi mz. 60 lt. 37"}],
+    "Sullana":       [{name:"Sullana", dir:"Av. s/n – Sullana"}],
+    "Talara":        [{name:"Talara", dir:"Av. s/n – Talara"}],
+    "Paita":         [{name:"Paita", dir:"Av. s/n – Paita"}],
+    "Sechura":       [{name:"Sechura", dir:"Av. s/n – Sechura"}],
+    "Chulucanas":    [{name:"Chulucanas", dir:"Av. s/n – Chulucanas, Morropón"}],
+    "Tambogrande":   [{name:"Tambogrande", dir:"Av. lima n° 590 – Tambogrande"}],
+    "Las Lomas":     [{name:"Las Lomas", dir:"Jr. miguel grau mz. h lt. 7, las lomas"}],
+  },
+  "San Martín": {
+    "Tarapoto":     [{name:"Tarapoto CO", dir:"Av. circunvalación s/n"},{name:"Jr. Alfonso Ugarte", dir:"Jr. alfonso ugarte s/n"},{name:"Banda de Shilcayo", dir:"Av. s/n – Banda de Shilcayo"}],
+    "Moyobamba":    [{name:"Moyobamba", dir:"Jr. serafín filomeno s/n"},{name:"Av. Grau Moyobamba", dir:"Av. grau s/n"}],
+    "Juanjuí":      [{name:"Juanjuí", dir:"Av. perú s/n – Juanjuí"}],
+    "Rioja":        [{name:"Rioja", dir:"Av. s/n – Rioja"},{name:"Nueva Cajamarca", dir:"Av. s/n – Nueva Cajamarca, Rioja"}],
+    "Tocache":      [{name:"Tocache", dir:"Av. s/n – Tocache"}],
+    "Bellavista":   [{name:"Bellavista", dir:"Av. s/n – Bellavista"}],
+    "Lamas":        [{name:"Lamas", dir:"Av. s/n – Lamas"}],
+    "Picota":       [{name:"Picota", dir:"Av. s/n – Picota"}],
+    "Saposoa":      [{name:"Saposoa", dir:"Av. s/n – Saposoa"}],
+    "Uchiza":       [{name:"Uchiza", dir:"Av. s/n – Uchiza, Tocache"}],
+  },
+  "Junín": {
+    "Huancayo":     [{name:"Jr. Ica", dir:"Jr. ica s/n"},{name:"Av. Ferrocarril", dir:"Av. ferrocarril s/n"},{name:"El Tambo", dir:"Av. s/n – El Tambo"},{name:"Chilca", dir:"Av. s/n – Chilca"},{name:"Real Plaza Huancayo", dir:"Av. cesar vallejo s/n"}],
+    "Tarma":        [{name:"Tarma", dir:"Jr. pasco 464"}],
+    "La Merced":    [{name:"La Merced", dir:"Jr. arequipa 279 urb. La Merced, Chanchamayo"},{name:"Av. Perú La Merced", dir:"Av. perú 1152, pampa del carmen"}],
+    "San Ramón":    [{name:"San Ramón", dir:"Jr. progreso 414"}],
+    "Pichanaqui":   [{name:"Pichanaqui", dir:"Av. carretera marginal 481"}],
+    "Mazamari":     [{name:"Mazamari", dir:"Av. perú n° 583"}],
+    "Satipo":       [{name:"Satipo", dir:"Av. s/n – Satipo"}],
+    "Jauja":        [{name:"Jauja", dir:"Av. s/n – Jauja"}],
+    "Concepción":   [{name:"Concepción", dir:"Av. s/n – Concepción"}],
+  },
+  "Lambayeque": {
+    "Chiclayo":     [{name:"Chiclayo", dir:"Av. s/n – Chiclayo"},{name:"Av. Balta Chiclayo", dir:"Av. balta cdra. 36 s/n"},{name:"Mariscal Castilla", dir:"Av. mariscal castilla s/n"},{name:"Miraflores Chiclayo", dir:"Av. s/n urb. miraflores"}],
+    "José L. Ortiz":[{name:"Jose Leonardo Ortiz", dir:"Av. s/n – José Leonardo Ortiz"}],
+    "Ferreñafe":    [{name:"Ferreñafe", dir:"Av. s/n – Ferreñafe"}],
+    "Lambayeque":   [{name:"Lambayeque", dir:"Av. s/n – Lambayeque"}],
+    "Motupe":       [{name:"Motupe", dir:"Av. s/n – Motupe"}],
+    "Olmos":        [{name:"Olmos", dir:"Av. s/n – Olmos"}],
+    "Tumán":        [{name:"Tuman", dir:"Av. s/n – Tumán, Chiclayo"}],
+    "Pimentel":     [{name:"Pimentel", dir:"Av. s/n – Pimentel"}],
+  },
+  "Cajamarca": {
+    "Cajamarca":    [{name:"Cajamarca", dir:"Av. s/n – Cajamarca"},{name:"Horacio Zevallos", dir:"Av. horacio zevallos s/n"},{name:"Barrio San Jose", dir:"Barrio san jose s/n"}],
+    "Baños del Inca":[{name:"Baños del Inca", dir:"Av. s/n – Baños del Inca"}],
+    "Bambamarca":   [{name:"Bambamarca", dir:"Av. s/n – Bambamarca, Hualgayoc"}],
+    "Chota":        [{name:"Chota", dir:"Av. s/n – Chota"}],
+    "Cutervo":      [{name:"Cutervo", dir:"Av. s/n – Cutervo"}],
+    "Jaén":         [{name:"Jaen", dir:"Av. s/n – Jaén"},{name:"Av. Pakamuros", dir:"Av. pakamuros s/n"}],
+    "San Ignacio":  [{name:"San Ignacio", dir:"Av. s/n – San Ignacio"}],
+    "Cajabamba":    [{name:"Cajabamba", dir:"Av. s/n – Cajabamba"}],
+    "Celendín":     [{name:"Celendin", dir:"Av. s/n – Celendín"}],
+  },
+  "Ica": {
+    "Ica":          [{name:"Ica Av. JJ Elias", dir:"Av. jj elias s/n"},{name:"Ica Urb. Manzanilla", dir:"Urb. manzanilla s/n"}],
+    "Nazca":        [{name:"Nazca", dir:"Av. s/n – Nazca"}],
+    "Pisco":        [{name:"Pisco", dir:"Av. s/n – Pisco"},{name:"San Andrés", dir:"Av. s/n – San Andrés, Pisco"}],
+    "Chincha":      [{name:"Chincha Alta", dir:"Av. s/n – Chincha Alta"},{name:"El Carmen", dir:"Av. s/n – El Carmen, Chincha"}],
+    "Palpa":        [{name:"Palpa", dir:"Av. s/n – Palpa"}],
+  },
+  "Puno": {
+    "Juliaca":      [{name:"San Santiago Co", dir:"Jr. Mama Ocllo 915-B (cruce con Jr. Azángaro)"},{name:"Av. Huancane Cdra. 9", dir:"Jr. Sillustani N° 202"},{name:"Las Mercedes", dir:"Jr. porvenir n° 228 urb. Las Mercedes"},{name:"Av. Lampa", dir:"Av. lampa mz. b2 lt. 3 urb. santa adriana"},{name:"Av. Modesto Borda", dir:"Av. modesto borda mz. a lt. 04 urb. arrabal don julio"},{name:"Av. Independencia", dir:"Av. independencia nro. 1538 mz. a1 lt. 04 urb. horacio zeballos gamez"},{name:"Jr. Agustin Gamarra", dir:"Jr. agustin gamarra mz. r1 lt. 09 urb. huancane"}],
+    "Puno":         [{name:"Puno Co", dir:"Av. s/n – Puno"},{name:"Jr. Moquegua", dir:"Jr. moquegua s/n"}],
+    "Ilave":        [{name:"Ilave", dir:"Av. s/n – Ilave, El Collao"}],
+    "Yunguyo":      [{name:"Yunguyo", dir:"Av. s/n – Yunguyo"}],
+    "Desaguadero":  [{name:"Desaguadero", dir:"Av. s/n – Desaguadero"}],
+    "Azángaro":     [{name:"Azángaro", dir:"Av. s/n – Azángaro"}],
+    "Ayaviri":      [{name:"Ayaviri", dir:"Av. s/n – Ayaviri, Melgar"}],
+  },
+  "Áncash": {
+    "Chimbote":     [{name:"Chimbote", dir:"Av. s/n – Chimbote"},{name:"Nuevo Chimbote", dir:"Av. s/n – Nuevo Chimbote"},{name:"Av. Meiggs", dir:"Av. meiggs s/n"}],
+    "Huaraz":       [{name:"Huaraz", dir:"Av. antonio lorena s/n"},{name:"Jr. Lucar y Torre", dir:"Jr. lucar y torre s/n"}],
+    "Casma":        [{name:"Casma", dir:"Av. s/n – Casma"}],
+    "Huarmey":      [{name:"Huarmey", dir:"Av. s/n – Huarmey"}],
+    "Caraz":        [{name:"Caraz", dir:"Av. s/n – Caraz, Huaylas"}],
+    "Yungay":       [{name:"Yungay", dir:"Av. s/n – Yungay"}],
+    "Carhuaz":      [{name:"Carhuaz", dir:"Av. s/n – Carhuaz"}],
+    "Barranca":     [{name:"Barranca", dir:"Av. s/n – Barranca"}],
+    "Huacho":       [{name:"Huacho", dir:"Av. s/n – Huacho"}],
+    "Huaral":       [{name:"Huaral", dir:"Av. s/n – Huaral"}],
+  },
+  "Tacna": {
+    "Tacna":          [{name:"Av. Jorge Basadre", dir:"Av. jorge basadre s/n"},{name:"Urb. Andrés Araujo Morán", dir:"Urb. andrés araujo morán mz. 28-a lote 03 calle jacinto seminario"}],
+    "Greg. Albarracín":[{name:"Asoc. Las Vilcas", dir:"Asociación las vilcas mz. e lt. 16"},{name:"Promuvi Viñani", dir:"Promuvi viñani, amp. i etapa, mz. 574, lt. 09"}],
+    "Candarave":      [{name:"Candarave", dir:"Av. s/n – Candarave"}],
+    "Tarata":         [{name:"Tarata", dir:"Av. s/n – Tarata"}],
+  },
+  "Tumbes": {
+    "Tumbes":     [{name:"Villa Primavera – Panamericana Norte", dir:"Av. panamericana norte s/n villa primavera"},{name:"Pampa Grande", dir:"Mz. 0u lt. 00a aa.hh. pampa grande"},{name:"Av. Universitaria", dir:"Av. universitaria s/n"}],
+    "Corrales":   [{name:"Av. Huáscar", dir:"Av. huáscar nº 311 int. 01 centro, Corrales"}],
+    "La Cruz":    [{name:"La Cruz", dir:"Jr. piura 105 caleta la cruz"}],
+    "Zorritos":   [{name:"Zorritos", dir:"Av. grau 307-01 – Zorritos, Contralmirante Villa"}],
+    "Zarumilla":  [{name:"Zarumilla", dir:"Av. s/n – Zarumilla"}],
+    "Aguas Verdes":[{name:"Aguas Verdes", dir:"Av. s/n – Aguas Verdes"}],
+  },
+  "Loreto": {
+    "Iquitos":    [{name:"Jr. Pablo Rossell", dir:"Jr. pablo rossell s/n"},{name:"Av. Jose A. Quiñones", dir:"Av. jose a. quiñones s/n"},{name:"Jr. Cahuide", dir:"Jr. cahuide s/n"},{name:"Jr. Ramón Castilla", dir:"Jr. ramón castilla s/n"},{name:"Jr. Tahuantinsuyo", dir:"Jr. tahuantinsuyo s/n"}],
+    "Yurimaguas": [{name:"Yurimaguas", dir:"Av. s/n – Yurimaguas, Alto Amazonas"}],
+    "Nauta":      [{name:"Nauta", dir:"Av. s/n – Nauta"}],
+    "Requena":    [{name:"Requena", dir:"Av. s/n – Requena"}],
+  },
+  "Ucayali": {
+    "Pucallpa":   [{name:"Pucallpa Co", dir:"Av. s/n – Pucallpa"},{name:"Av. Centenario", dir:"Av. centenario s/n"},{name:"Jr. Tahuantinsuyo", dir:"Jr. tahuantinsuyo s/n"},{name:"Jr. 7 de Junio", dir:"Jr. 7 de junio nro. s/n"},{name:"Jr. 28 de Julio", dir:"Jr. 28 de julio mz i lt 12"}],
+    "Aguaytía":   [{name:"Aguaytía", dir:"Av. s/n – Aguaytía, Padre Abad"}],
+    "Contamana":  [{name:"Contamana", dir:"Av. s/n – Contamana"}],
+  },
+  "Moquegua": {
+    "Moquegua": [{name:"Moquegua", dir:"Av. s/n – Moquegua"},{name:"Av. Balta", dir:"Av. balta s/n"}],
+    "Ilo":      [{name:"Ilo", dir:"Av. s/n – Ilo"},{name:"Jr. 28 de Julio Ilo", dir:"Jr. 28 de julio mz i lt 12 – Ilo"}],
+    "Torata":   [{name:"Torata", dir:"Av. s/n – Torata"}],
+    "Omate":    [{name:"Omate", dir:"Av. s/n – Omate, Gral. Sánchez Cerro"}],
+  },
+  "Amazonas": {
+    "Chachapoyas": [{name:"Chachapoyas", dir:"Av. s/n – Chachapoyas"}],
+    "Bagua Grande": [{name:"Bagua Grande", dir:"Av. s/n – Bagua Grande, Utcubamba"}],
+    "Bagua":       [{name:"Bagua", dir:"Av. s/n – Bagua"}],
+    "Pedro Ruiz":  [{name:"Pedro Ruiz", dir:"Av. s/n – Pedro Ruiz, Bongará"}],
+    "Jamalca":     [{name:"Jamalca", dir:"Av. s/n – Jamalca"}],
+    "Lonya Grande":[{name:"Lonya Grande", dir:"Av. s/n – Lonya Grande"}],
+  },
+  "Huánuco": {
+    "Huánuco":    [{name:"Av. Antonio Raymondi Norte", dir:"Av. antonio raymondi norte n° 241"},{name:"Jr. Tahuantinsuyo", dir:"Jr. tahuantinsuyo s/n"}],
+    "Tingo María":[{name:"Tingo María", dir:"Av. s/n – Tingo María, Leoncio Prado"}],
+    "La Unión":   [{name:"La Unión (Huánuco)", dir:"Av. s/n – La Unión, Dos de Mayo"}],
+    "Ambo":       [{name:"Ambo", dir:"Av. s/n – Ambo"}],
+  },
+  "Madre de Dios": {
+    "Puerto Maldonado": [{name:"Av. León Velarde", dir:"Av. león velarde s/n"},{name:"Puerto Maldonado", dir:"Av. s/n – Puerto Maldonado"}],
+    "Inambari":  [{name:"Inambari", dir:"Av. s/n – Inambari"}],
+    "Iberia":    [{name:"Iberia", dir:"Av. s/n – Iberia, Tahuamanu"}],
+    "Iñapari":   [{name:"Iñapari", dir:"Av. s/n – Iñapari, Tahuamanu"}],
+    "Mazuko":    [{name:"Mazuko", dir:"Av. s/n – Mazuko, Inambari"}],
+  },
+  "Ayacucho": {
+    "Ayacucho":   [{name:"Ayacucho", dir:"Av. s/n – Ayacucho"},{name:"Jr. 9 de Diciembre", dir:"Jr. 9 de diciembre s/n"}],
+    "Huanta":     [{name:"Huanta", dir:"Av. s/n – Huanta"}],
+    "San Francisco":[{name:"San Francisco (Ayacucho)", dir:"Av. s/n – San Francisco, La Mar"}],
+  },
+  "Pasco": {
+    "Cerro de Pasco": [{name:"Cerro de Pasco", dir:"Av. s/n – Cerro de Pasco"}],
+    "Huayllay":   [{name:"Huayllay", dir:"Av. s/n – Huayllay"}],
+    "Oxapampa":   [{name:"Oxapampa", dir:"Av. s/n – Oxapampa"}],
+    "Villa Rica":  [{name:"Villa Rica", dir:"Av. s/n – Villa Rica, Oxapampa"}],
+  },
+  "Apurímac": {
+    "Abancay":      [{name:"Abancay", dir:"Av. s/n – Abancay"}],
+    "Andahuaylas":  [{name:"Andahuaylas", dir:"Av. s/n – Andahuaylas"}],
+  },
+  "Huancavelica": {
+    "Huancavelica": [{name:"Huancavelica", dir:"Av. s/n – Huancavelica"}],
+  },
+};
+
+const OLVA = {
+  "Lima": {
+    "San Juan de Lurigancho": [{name:"Tienda SJL – Próceres", dir:"Av. Próceres de la Independencia 2532, SJL"}],
+    "El Agustino":   [{name:"Tienda Qinti Express", dir:"Prolongación Ayacucho 1290, El Agustino"}],
+    "Santa Anita":   [{name:"Tienda Santa Anita", dir:"Av. Santa Rosa 131, Santa Anita"}],
+    "Cercado de Lima":[{name:"Tienda Cercado – Psje. Acuña", dir:"Psje. Acuña 131, Cercado de Lima"},{name:"Tienda Plaza Tec", dir:"Av. Garcilaso de la Vega 1358, Cercado"}],
+    "Lince":         [{name:"Tienda Lince – Av. Arenales", dir:"Av. Gral. Álvarez de Arenales 1775, Lince"}],
+    "San Luis":      [{name:"Tienda San Luis", dir:"Av. del Aire 1322, San Luis"}],
+    "Pueblo Libre":  [{name:"Tienda Pueblo Libre", dir:"Av. Bolívar 1427 A, Pueblo Libre"}],
+    "San Isidro":    [{name:"Tienda San Isidro", dir:"Av. República de Panamá 3603, San Isidro"},{name:"Mail Boxes San Isidro", dir:"Begonias 774, San Isidro"}],
+    "Surquillo":     [{name:"Tienda Andrés Aramburú", dir:"Av. Andrés Aramburú 978, Surquillo"}],
+    "San Miguel":    [{name:"Tienda San Miguel", dir:"Intisuyo 295, San Miguel"}],
+    "Miraflores":    [{name:"Tienda Miraflores", dir:"Av. Comandante Espinar 659, Miraflores"},{name:"Mail Boxes Miraflores", dir:"Calle Berlín 219, Miraflores"}],
+    "San Borja":     [{name:"Tienda San Borja", dir:"Av. Aviación 3532, San Borja"}],
+    "Callao":        [{name:"Tienda Callao – Av. Sáenz Peña", dir:"Av. Sáenz Peña 1463, Callao"},{name:"Almacén Central Callao", dir:"Av. Argentina 4458, Callao"}],
+    "Los Olivos":    [{name:"Tienda Los Olivos", dir:"Av. Carlos Izaguirre 1006, Urb. Covida, Los Olivos"}],
+    "La Molina":     [{name:"Tienda La Molina", dir:"Av. Coronel Juan Pringues 458, La Molina"}],
+    "Santiago de Surco": [{name:"Tienda Surco – Av. El Polo", dir:"Av. El Polo 108, Santiago de Surco"}],
+    "San Martín de Porres": [{name:"Tienda SMP – Jr. Cajahuamán", dir:"Jr. Juan Cajahuamán 873, SMP"},{name:"Tienda Canta Callao", dir:"Av. Canta Callao 396, SMP"}],
+    "Comas":         [{name:"Tienda Comas", dir:"Av. Universitaria Norte 6971-6973, Comas"}],
+    "San Juan de Miraflores": [{name:"Tienda San Juan de Miraflores", dir:"Av. San Juan 713, SJM"}],
+    "Chorrillos":    [{name:"Tienda Chorrillos", dir:"Prol. Av. Paseo de la República 1515, Chorrillos"}],
+    "Villa El Salvador": [{name:"Tienda Villa El Salvador", dir:"Av. 1ro de Mayo s/n, VES"}],
+    "Puente Piedra": [{name:"Tienda Puente Piedra", dir:"Av. Sáenz Peña 316, Puente Piedra"}],
+    "Lurigancho-Chosica": [{name:"Tienda Chosica", dir:"Av. Lima Sur 853, Lurigancho – Chosica"}],
+    "La Victoria":   [{name:"Tienda Gamarra", dir:"Jr. Antonio Bazo 1278-1280, La Victoria"}],
+  },
+  "Arequipa": {
+    "Arequipa": [
+      {name:"Olva – Av. Socabaya", dir:"Av. socabaya 429-b – Arequipa"},
+      {name:"Olva – Av. Caravelí", dir:"Av. caravelí 402 – Arequipa"},
+      {name:"Olva – Av. Perú", dir:"Av. perú 104 – Arequipa"},
+      {name:"Olva – Av. Aviación", dir:"Av. aviación 102 – Arequipa"},
+      {name:"Olva – Av. Viña del Mar", dir:"Av. viña del mar 105 – Arequipa"},
+      {name:"Olva – Gral. Sanchez Cerro", dir:"Av. general sánchez cerro s/n – Arequipa"},
+      {name:"Olva – Buenaventura Orcopampa", dir:"Av. buenaventura con av. orcopampa s/n – Arequipa"},
+    ],
+  },
+  "La Libertad": {
+    "Trujillo": [
+      {name:"Olva Trujillo – Av. Santa", dir:"Av. santa 1260 – Trujillo"},
+      {name:"Olva Trujillo – Jr. Zepita", dir:"Jr. zepita 572 – Trujillo"},
+      {name:"Olva Trujillo – Av. Mansiche", dir:"Av. mansiche nro. 2042 – Trujillo"},
+      {name:"Olva Trujillo – Real Plaza", dir:"Av. cesar vallejo oeste n° 1345 – Trujillo"},
+    ],
+  },
+  "Piura": {
+    "Piura": [{name:"Olva Piura – Av. Perú 1839", dir:"Av. perú 1839 – Piura"}],
+  },
+  "Lambayeque": {
+    "Chiclayo": [{name:"Olva Chiclayo – Av. Obrera", dir:"Av. obrera 1113-a – Chiclayo"}],
+  },
+  "Junín": {
+    "Huancayo":    [{name:"Olva Huancayo", dir:"Av. tupac amaru 1675 urb. alto mochica"},{name:"Olva Huancayo – Real Plaza", dir:"Av. cesar vallejo s/n – Real Plaza Huancayo"}],
+    "La Merced":   [{name:"Olva La Merced", dir:"Jr. arequipa 279-urb. La Merced, Chanchamayo"}],
+    "San Ramón":   [{name:"Olva San Ramón", dir:"Jr. progreso 414 – San Ramón"}],
+    "Pichanaqui":  [{name:"Olva Pichanaqui", dir:"Av. carretera marginal 481 – Pichanaqui"}],
+    "Mazamari":    [{name:"Olva Mazamari", dir:"Av. perú n° 583 – Mazamari"}],
+    "Pangoa":      [{name:"Olva Pangoa", dir:"Calle ucayali nro. 448 – Pangoa"}],
+    "Tarma":       [{name:"Olva Tarma", dir:"Jr. pasco 464 – Tarma"}],
+  },
+  "San Martín": {
+    "San Martín": [{name:"Olva San Martín – Av. 27 de Diciembre", dir:"Av. 27 de diciembre 703 pj. san francisco"}],
+  },
+  "Otros departamentos": {
+    "Verificar en web oficial": [{name:"Consultar olvacourier.com/ubicanos", dir:"Verificar dirección exacta en: olvacourier.com/ubicanos  |  Tel: (01) 714-0909"}],
+  },
+};
+
+// ──────────────────────────────────────────────
+// ESTADO
+// ──────────────────────────────────────────────
+let tipoEntrega = "";
+let currentStep = 1;
+
+// Set min date = today
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('fecha').setAttribute('min', today);
+
+// ──────────────────────────────────────────────
+// STEP INDICATOR
+// ──────────────────────────────────────────────
+function updateSteps(step) {
+  currentStep = step;
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.className = 'step-dot';
+    if (i < step) dot.classList.add('done');
+    else if (i === step) dot.classList.add('active');
+  }
+  document.getElementById('step-text').textContent = `Paso ${step} de 3`;
+}
+
+// ──────────────────────────────────────────────
+// SELECCIONAR TIPO ENTREGA
+// ──────────────────────────────────────────────
+function selectDelivery(tipo) {
+  tipoEntrega = tipo;
+  document.querySelectorAll('.delivery-btn').forEach(b => b.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  document.getElementById('err-tipo').classList.remove('show');
+
+  // Show step 2
+  document.getElementById('step2-section').classList.add('visible');
+  document.getElementById('sec-shalom').classList.remove('visible');
+  document.getElementById('sec-olva').classList.remove('visible');
+  document.getElementById('sec-delivery').classList.remove('visible');
+
+  if (tipo === 'shalom')   document.getElementById('sec-shalom').classList.add('visible');
+  if (tipo === 'olva')     document.getElementById('sec-olva').classList.add('visible');
+  if (tipo === 'delivery') document.getElementById('sec-delivery').classList.add('visible');
+
+  // Show step 3
+  document.getElementById('step3-section').classList.add('visible');
+
+  updateSteps(2);
+  setTimeout(() => document.getElementById('step2-section').scrollIntoView({behavior:'smooth', block:'start'}), 100);
+}
+
+// ──────────────────────────────────────────────
+// SHALOM CASCADA
+// ──────────────────────────────────────────────
+function loadShalom() {
+  const dep = document.getElementById('shalom-dep').value;
+  const ciudadSel = document.getElementById('shalom-ciudad');
+  const agSel = document.getElementById('shalom-agencia');
+  ciudadSel.innerHTML = '<option value="">Selecciona la ciudad...</option>';
+  agSel.innerHTML = '<option value="">Selecciona la ciudad primero...</option>';
+  document.getElementById('shalom-dir').value = '';
+  if (!dep || !SHALOM[dep]) return;
+  Object.keys(SHALOM[dep]).forEach(ciudad => {
+    ciudadSel.innerHTML += `<option>${ciudad}</option>`;
+  });
+  ciudadSel.onchange = loadShalomAgencias;
+}
+
+function loadShalomAgencias() {
+  const dep = document.getElementById('shalom-dep').value;
+  const ciudad = document.getElementById('shalom-ciudad').value;
+  const agSel = document.getElementById('shalom-agencia');
+  agSel.innerHTML = '<option value="">Selecciona la agencia...</option>';
+  document.getElementById('shalom-dir').value = '';
+  if (!dep || !ciudad || !SHALOM[dep]?.[ciudad]) return;
+  SHALOM[dep][ciudad].forEach(ag => {
+    agSel.innerHTML += `<option value="${ag.dir}">${ag.name}</option>`;
+  });
+}
+
+function fillSholomDir() {
+  const ag = document.getElementById('shalom-agencia');
+  document.getElementById('shalom-dir').value = ag.value;
+}
+
+// ──────────────────────────────────────────────
+// OLVA CASCADA
+// ──────────────────────────────────────────────
+function loadOlva() {
+  const dep = document.getElementById('olva-dep').value;
+  const agSel = document.getElementById('olva-agencia');
+  agSel.innerHTML = '<option value="">Selecciona la agencia...</option>';
+  document.getElementById('olva-dir').value = '';
+  if (!dep || !OLVA[dep]) return;
+  Object.values(OLVA[dep]).flat().forEach(ag => {
+    agSel.innerHTML += `<option value="${ag.dir}">${ag.name}</option>`;
+  });
+}
+
+function fillOlvaDir() {
+  const ag = document.getElementById('olva-agencia');
+  document.getElementById('olva-dir').value = ag.value;
+}
+
+// ──────────────────────────────────────────────
+// VALIDACIÓN
+// ──────────────────────────────────────────────
+function showErr(id, show) {
+  document.getElementById(id).classList.toggle('show', show);
+}
+
+function validate() {
+  let ok = true;
+
+  if (!tipoEntrega) { showErr('err-tipo', true); ok = false; }
+  else showErr('err-tipo', false);
+
+  if (tipoEntrega === 'shalom') {
+    const dep = document.getElementById('shalom-dep').value;
+    const ciudad = document.getElementById('shalom-ciudad').value;
+    const ag = document.getElementById('shalom-agencia').value;
+    if (!dep)    { showErr('err-sdep', true); ok = false; } else showErr('err-sdep', false);
+    if (!ciudad) { showErr('err-sciudad', true); ok = false; } else showErr('err-sciudad', false);
+    if (!ag)     { showErr('err-sagencia', true); ok = false; } else showErr('err-sagencia', false);
+  }
+
+  if (tipoEntrega === 'olva') {
+    const dep = document.getElementById('olva-dep').value;
+    const ag = document.getElementById('olva-agencia').value;
+    if (!dep) { showErr('err-odep', true); ok = false; } else showErr('err-odep', false);
+    if (!ag)  { showErr('err-oagencia', true); ok = false; } else showErr('err-oagencia', false);
+  }
+
+  if (tipoEntrega === 'delivery') {
+    const dist = document.getElementById('delivery-distrito').value;
+    const dir  = document.getElementById('delivery-dir').value.trim();
+    if (!dist) { showErr('err-ddistr', true); ok = false; } else showErr('err-ddistr', false);
+    if (!dir)  { showErr('err-ddir', true); ok = false; } else showErr('err-ddir', false);
+  }
+
+  const nombre = document.getElementById('nombre').value.trim();
+  const dni    = document.getElementById('dni').value.trim();
+  const wa     = document.getElementById('whatsapp').value.trim();
+  const fecha  = document.getElementById('fecha').value;
+
+  if (!nombre) { showErr('err-nombre', true); ok = false; } else showErr('err-nombre', false);
+  if (!dni || dni.length < 8) { showErr('err-dni', true); ok = false; } else showErr('err-dni', false);
+  if (!wa || wa.length < 9)   { showErr('err-wa', true); ok = false; }  else showErr('err-wa', false);
+  if (!fecha) { showErr('err-fecha', true); ok = false; }              else showErr('err-fecha', false);
+
+  return ok;
+}
+
+// ──────────────────────────────────────────────
+// CONSTRUIR MENSAJE Y ENVIAR
+// ──────────────────────────────────────────────
+function enviarWhatsApp() {
+  if (!validate()) {
+    document.querySelector('.err.show, .error-msg.show')?.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
+  const nombre = document.getElementById('nombre').value.trim();
+  const dni    = document.getElementById('dni').value.trim();
+  const wa     = document.getElementById('whatsapp').value.trim();
+  const fecha  = document.getElementById('fecha').value;
+  const nota   = document.getElementById('nota').value.trim();
+  const fechaFmt = new Date(fecha + 'T12:00:00').toLocaleDateString('es-PE', {day:'2-digit', month:'long', year:'numeric'});
+
+  let envioInfo = '';
+  if (tipoEntrega === 'shalom') {
+    const dep    = document.getElementById('shalom-dep').value;
+    const ciudad = document.getElementById('shalom-ciudad').value;
+    const ag     = document.getElementById('shalom-agencia');
+    const dir    = document.getElementById('shalom-dir').value;
+    envioInfo = `📦 *ENVÍO POR SHALOM*\n🗺️ Departamento: ${dep}\n🏙️ Ciudad: ${ciudad}\n🏢 Agencia: ${ag.options[ag.selectedIndex].text}\n📍 Dirección agencia: ${dir}`;
+  } else if (tipoEntrega === 'olva') {
+    const dep = document.getElementById('olva-dep').value;
+    const ag  = document.getElementById('olva-agencia');
+    const dir = document.getElementById('olva-dir').value;
+    envioInfo = `📦 *ENVÍO POR OLVA*\n🗺️ Departamento: ${dep}\n🏢 Agencia: ${ag.options[ag.selectedIndex].text}\n📍 Dirección agencia: ${dir}`;
+  } else {
+    const dist = document.getElementById('delivery-distrito').value;
+    const dir  = document.getElementById('delivery-dir').value.trim();
+    const ref  = document.getElementById('delivery-ref').value.trim();
+    envioInfo = `🛵 *DELIVERY A DOMICILIO*\n🏙️ Distrito: ${dist}\n📍 Dirección: ${dir}${ref ? '\n📌 Referencia: ' + ref : ''}`;
+  }
+
+  const msg = `🛍️ *NUEVO PEDIDO – LOOK POINT*\n${'─'.repeat(30)}\n\n👤 *Cliente*\n• Nombre: ${nombre}\n• DNI/CE: ${dni}\n• WhatsApp: +51 ${wa}\n\n${envioInfo}\n\n📅 *Fecha de envío deseada:* ${fechaFmt}${nota ? '\n\n💬 *Nota:* ' + nota : ''}\n\n${'─'.repeat(30)}\n_Enviado desde el formulario Look Point_`;
+
+  const NUMERO_WA  = '51966776807';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxP9b2aqB_9o_JsHqOMW7V1C-gN9GqrFXEpH4wTd0zXpRc4ocvkhypDXADGCbo36Wx9/exec';
+
+  // Armar payload para Google Sheets
+  let departamento = '', ciudad = '', agencia = '', direccion = '', referencia = '', transportista = '';
+  if (tipoEntrega === 'shalom') {
+    transportista = 'SHALOM';
+    departamento  = document.getElementById('shalom-dep').value;
+    ciudad        = document.getElementById('shalom-ciudad').value;
+    const agEl    = document.getElementById('shalom-agencia');
+    agencia       = agEl.options[agEl.selectedIndex]?.text || '';
+    direccion     = document.getElementById('shalom-dir').value;
+  } else if (tipoEntrega === 'olva') {
+    transportista = 'OLVA';
+    departamento  = document.getElementById('olva-dep').value;
+    const agEl    = document.getElementById('olva-agencia');
+    agencia       = agEl.options[agEl.selectedIndex]?.text || '';
+    direccion     = document.getElementById('olva-dir').value;
+  } else {
+    transportista = 'DELIVERY';
+    ciudad        = document.getElementById('delivery-distrito').value;
+    direccion     = document.getElementById('delivery-dir').value.trim();
+    referencia    = document.getElementById('delivery-ref').value.trim();
+  }
+
+  // Guardar en Google Sheets (background, no bloquea)
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      whatsapp: wa, dni, nombre,
+      tipoEntrega: tipoEntrega.toUpperCase(),
+      transportista, departamento, ciudad,
+      agencia, direccion, referencia,
+      fechaEnvio: fecha, nota
+    })
+  }).catch(() => {});
+
+  // Abrir WhatsApp
+  const url = `https://api.whatsapp.com/send?phone=${NUMERO_WA}&text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+
+  document.getElementById('form-main').style.display = 'none';
+  document.getElementById('success-card').classList.add('show');
+}
+</script>
+</body>
+</html>
