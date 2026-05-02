@@ -1292,7 +1292,7 @@ function enviarWhatsApp() {
     referencia    = document.getElementById('delivery-ref').value.trim();
   }
 
-  // Guardar en Google Sheets via iframe trick (bypasa CORS)
+  // Guardar en Google Sheets via form oculto (sin restricción CORS)
   const payload = {
     whatsapp: wa, dni, nombre,
     tipoEntrega: tipoEntrega.toUpperCase(),
@@ -1301,18 +1301,43 @@ function enviarWhatsApp() {
     fechaEnvio: fecha, nota
   };
 
-  // Método 1: fetch no-cors con URLSearchParams (más compatible)
-  const formData = new URLSearchParams();
-  formData.append('data', JSON.stringify(payload));
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: formData
-  }).catch(() => {});
+  try {
+    // Crear iframe oculto para recibir respuesta sin redirigir la página
+    const iframeName = 'hidden_iframe_' + Date.now();
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
 
-  // Método 2: imagen pixel de respaldo (garantiza envío)
-  const img = new Image();
-  img.src = SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payload));
+    // Crear form oculto que envía al iframe
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = SCRIPT_URL;
+    form.target = iframeName;
+    form.style.display = 'none';
+
+    // Agregar cada campo como input hidden
+    Object.entries(payload).forEach(([key, val]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = val || '';
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+
+    // Limpiar después de 5 segundos
+    setTimeout(() => {
+      document.body.removeChild(form);
+      document.body.removeChild(iframe);
+    }, 5000);
+  } catch(err) {
+    // Fallback: GET con parámetros
+    const img = new Image();
+    img.src = SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payload));
+  }
 
   // Abrir WhatsApp
   const url = `https://api.whatsapp.com/send?phone=${NUMERO_WA}&text=${encodeURIComponent(msg)}`;
