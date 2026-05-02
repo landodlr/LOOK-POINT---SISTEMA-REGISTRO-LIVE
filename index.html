@@ -1292,52 +1292,30 @@ function enviarWhatsApp() {
     referencia    = document.getElementById('delivery-ref').value.trim();
   }
 
-  // Guardar en Google Sheets via form oculto (sin restricción CORS)
-  const payload = {
-    whatsapp: wa, dni, nombre,
-    tipoEntrega: tipoEntrega.toUpperCase(),
-    transportista, departamento, ciudad,
-    agencia, direccion, referencia,
-    fechaEnvio: fecha, nota
-  };
+  // Guardar en Google Sheets via GET (sin problemas de CORS)
+  const params = new URLSearchParams({
+    whatsapp:      wa,
+    dni:           dni,
+    nombre:        nombre,
+    tipoEntrega:   tipoEntrega.toUpperCase(),
+    transportista: transportista,
+    departamento:  departamento,
+    ciudad:        ciudad,
+    agencia:       agencia,
+    direccion:     direccion,
+    referencia:    referencia,
+    fechaEnvio:    fecha,
+    nota:          nota
+  });
 
-  try {
-    // Crear iframe oculto para recibir respuesta sin redirigir la página
-    const iframeName = 'hidden_iframe_' + Date.now();
-    const iframe = document.createElement('iframe');
-    iframe.name = iframeName;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    // Crear form oculto que envía al iframe
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = SCRIPT_URL;
-    form.target = iframeName;
-    form.style.display = 'none';
-
-    // Agregar cada campo como input hidden
-    Object.entries(payload).forEach(([key, val]) => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = key;
-      input.value = val || '';
-      form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
-
-    // Limpiar después de 5 segundos
-    setTimeout(() => {
-      document.body.removeChild(form);
-      document.body.removeChild(iframe);
-    }, 5000);
-  } catch(err) {
-    // Fallback: GET con parámetros
+  fetch(SCRIPT_URL + '?' + params.toString(), {
+    method: 'GET',
+    mode:   'no-cors'
+  }).catch(() => {
+    // Fallback: pixel imagen
     const img = new Image();
-    img.src = SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payload));
-  }
+    img.src = SCRIPT_URL + '?' + params.toString();
+  });
 
   // Abrir WhatsApp
   const url = `https://api.whatsapp.com/send?phone=${NUMERO_WA}&text=${encodeURIComponent(msg)}`;
