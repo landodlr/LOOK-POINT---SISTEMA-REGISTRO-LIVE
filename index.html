@@ -1315,19 +1315,17 @@ function enviarWhatsApp() {
   document.getElementById('form-main').style.display = 'none';
   document.getElementById('success-card').classList.add('show');
 
-  // Método: script tag dinámico (no tiene restricciones CORS ni CORB)
-  const scriptTag = document.createElement('script');
-  scriptTag.src = SCRIPT_URL + '?' + params.toString() + '&callback=_lpCallback';
-  document.head.appendChild(scriptTag);
-  scriptTag.onload = scriptTag.onerror = () => {
-    document.head.removeChild(scriptTag);
-  };
+  // Guardar en Sheets via imagen pixel (sin CORS, sin CORB, imposible de bloquear)
+  const pixel = new Image();
+  pixel.src = SCRIPT_URL + '?' + params.toString();
+  // Mantener referencia para que no sea garbage collected
+  window._lpPixel = pixel;
 
-  // Abrir WhatsApp después de 1 segundo
+  // Abrir WhatsApp después de 1.5 segundos (da tiempo al pixel de enviarse)
   setTimeout(() => {
     const url = `https://api.whatsapp.com/send?phone=${NUMERO_WA}&text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
-  }, 1000);
+  }, 1500);
 }
 </script>
 </body>
