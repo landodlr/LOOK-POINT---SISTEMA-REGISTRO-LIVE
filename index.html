@@ -1238,7 +1238,8 @@ function validate() {
 // ──────────────────────────────────────────────
 function enviarWhatsApp() {
   if (!validate()) {
-    document.querySelector('.err.show, .error-msg.show')?.scrollIntoView({behavior:'smooth', block:'center'});
+    const firstErr = document.querySelector('.error-msg.show');
+    if (firstErr) firstErr.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
 
@@ -1249,32 +1250,12 @@ function enviarWhatsApp() {
   const nota   = document.getElementById('nota').value.trim();
   const fechaFmt = new Date(fecha + 'T12:00:00').toLocaleDateString('es-PE', {day:'2-digit', month:'long', year:'numeric'});
 
-  let envioInfo = '';
-  if (tipoEntrega === 'shalom') {
-    const dep    = document.getElementById('shalom-dep').value;
-    const ciudad = document.getElementById('shalom-ciudad').value;
-    const ag     = document.getElementById('shalom-agencia');
-    const dir    = document.getElementById('shalom-dir').value;
-    envioInfo = `📦 *ENVÍO POR SHALOM*\n🗺️ Departamento: ${dep}\n🏙️ Ciudad: ${ciudad}\n🏢 Agencia: ${ag.options[ag.selectedIndex].text}\n📍 Dirección agencia: ${dir}`;
-  } else if (tipoEntrega === 'olva') {
-    const dep = document.getElementById('olva-dep').value;
-    const ag  = document.getElementById('olva-agencia');
-    const dir = document.getElementById('olva-dir').value;
-    envioInfo = `📦 *ENVÍO POR OLVA*\n🗺️ Departamento: ${dep}\n🏢 Agencia: ${ag.options[ag.selectedIndex].text}\n📍 Dirección agencia: ${dir}`;
-  } else {
-    const dist = document.getElementById('delivery-distrito').value;
-    const dir  = document.getElementById('delivery-dir').value.trim();
-    const ref  = document.getElementById('delivery-ref').value.trim();
-    envioInfo = `🛵 *DELIVERY A DOMICILIO*\n🏙️ Distrito: ${dist}\n📍 Dirección: ${dir}${ref ? '\n📌 Referencia: ' + ref : ''}`;
-  }
-
-  const msg = `🛍️ *NUEVO PEDIDO – LOOK POINT*\n${'─'.repeat(30)}\n\n👤 *Cliente*\n• Nombre: ${nombre}\n• DNI/CE: ${dni}\n• WhatsApp: +51 ${wa}\n\n${envioInfo}\n\n📅 *Fecha de envío deseada:* ${fechaFmt}${nota ? '\n\n💬 *Nota:* ' + nota : ''}\n\n${'─'.repeat(30)}\n_Enviado desde el formulario Look Point_`;
-
   const NUMERO_WA  = '51966776807';
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwgMRtcG2i76do_nwyuweoYtYdk69kEmR14KmlIMon3v78KWg_qiZrpEfGUKZiQFEVs/exec';
 
-  // Armar payload para Google Sheets
-  let departamento = '', ciudad = '', agencia = '', direccion = '', referencia = '', transportista = '';
+  // Armar datos de envío
+  let envioInfo = '', departamento = '', ciudad = '', agencia = '', direccion = '', referencia = '', transportista = '';
+
   if (tipoEntrega === 'shalom') {
     transportista = 'SHALOM';
     departamento  = document.getElementById('shalom-dep').value;
@@ -1282,51 +1263,47 @@ function enviarWhatsApp() {
     const agEl    = document.getElementById('shalom-agencia');
     agencia       = agEl.options[agEl.selectedIndex]?.text || '';
     direccion     = document.getElementById('shalom-dir').value;
+    envioInfo = `📦 *ENVÍO POR SHALOM*\n🗺️ Departamento: ${departamento}\n🏙️ Ciudad: ${ciudad}\n🏢 Agencia: ${agencia}\n📍 Dirección: ${direccion}`;
   } else if (tipoEntrega === 'olva') {
     transportista = 'OLVA';
     departamento  = document.getElementById('olva-dep').value;
     const agEl    = document.getElementById('olva-agencia');
     agencia       = agEl.options[agEl.selectedIndex]?.text || '';
     direccion     = document.getElementById('olva-dir').value;
+    envioInfo = `📦 *ENVÍO POR OLVA*\n🗺️ Departamento: ${departamento}\n🏢 Agencia: ${agencia}\n📍 Dirección: ${direccion}`;
   } else {
     transportista = 'DELIVERY';
     ciudad        = document.getElementById('delivery-distrito').value;
     direccion     = document.getElementById('delivery-dir').value.trim();
     referencia    = document.getElementById('delivery-ref').value.trim();
+    envioInfo = `🛵 *DELIVERY A DOMICILIO*\n🏙️ Distrito: ${ciudad}\n📍 Dirección: ${direccion}${referencia ? '\n📌 Referencia: ' + referencia : ''}`;
   }
 
-  // Guardar en Sheets via script tag (bypasa CORB y CORS completamente)
-  const params = new URLSearchParams({
-    whatsapp:      wa,
-    dni:           dni,
-    nombre:        nombre,
-    tipoEntrega:   tipoEntrega.toUpperCase(),
-    transportista: transportista,
-    departamento:  departamento,
-    ciudad:        ciudad,
-    agencia:       agencia,
-    direccion:     direccion,
-    referencia:    referencia,
-    fechaEnvio:    fecha,
-    nota:          nota
-  });
+  const msg = `🛍️ *NUEVO PEDIDO – LOOK POINT*\n${'─'.repeat(30)}\n\n👤 *Cliente*\n• Nombre: ${nombre}\n• DNI/CE: ${dni}\n• WhatsApp: +51 ${wa}\n\n${envioInfo}\n\n📅 *Fecha de envío deseada:* ${fechaFmt}${nota ? '\n\n💬 *Nota:* ' + nota : ''}\n\n${'─'.repeat(30)}\n_Enviado desde el formulario Look Point_`;
 
   // Mostrar pantalla de éxito
   document.getElementById('form-main').style.display = 'none';
   document.getElementById('success-card').classList.add('show');
 
-  // Guardar en Sheets via imagen pixel (sin CORS, sin CORB, imposible de bloquear)
+  // Guardar en Sheets via imagen pixel
+  const params = new URLSearchParams({
+    whatsapp: wa, dni, nombre,
+    tipoEntrega: tipoEntrega.toUpperCase(),
+    transportista, departamento, ciudad,
+    agencia, direccion, referencia,
+    fechaEnvio: fecha, nota
+  });
+
   const pixel = new Image();
   pixel.src = SCRIPT_URL + '?' + params.toString();
-  // Mantener referencia para que no sea garbage collected
   window._lpPixel = pixel;
 
-  // Abrir WhatsApp después de 1.5 segundos (da tiempo al pixel de enviarse)
+  // Abrir WhatsApp después de 1.5s
   setTimeout(() => {
-    const url = `https://api.whatsapp.com/send?phone=${NUMERO_WA}&text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    window.open('https://api.whatsapp.com/send?phone=' + NUMERO_WA + '&text=' + encodeURIComponent(msg), '_blank');
   }, 1500);
 }
+
 </script>
 </body>
 </html>
